@@ -1,0 +1,17 @@
+{
+  "name": "Coffrets bois — Brunin-Guillier",
+  "short_name": "Coffrets bois",
+  "description": "Calculateur de prix des coffrets bois — usage interne des commerciaux.",
+  "lang": "fr-BE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf7f2",
+  "theme_color": "#7b1e2b",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

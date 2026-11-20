@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="fr-BE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Coffrets bois 2026 — Brunin-Guillier</title>
+<meta name="description" content="Calculateur de prix des coffrets bois — usage interne des commerciaux.">
+<meta name="theme-color" content="#7b1e2b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coffrets bois">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --bord: #7b1e2b;
+    --bord-d: #5e1620;
+    --bord-l: #f7eced;
+    --cream: #faf7f2;
+    --ink: #2b2420;
+    --muted: #7a6f66;
+    --line: #e5dccf;
+    --card: #ffffff;
+    --ok: #256b43;
+    --ok-bg: #e9f5ee;
+    --warn: #8a4b00;
+    --warn-bg: #fff3dc;
+    --wa: #1c8c4c;
+    --radius: 12px;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.4;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  /* En-tête */
+  .top {
+    background: var(--bord);
+    color: #fff;
+    padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  }
+  .top-in { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mono {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: #fff; color: var(--bord);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 15px; letter-spacing: .5px;
+  }
+  .t1 { font-weight: 700; font-size: 18px; }
+  .t2 { font-size: 12.5px; opacity: .85; }
+  .btn-install {
+    background: rgba(255,255,255,.15); color: #fff;
+    border: 1px solid rgba(255,255,255,.5); border-radius: 999px;
+    padding: 7px 14px; font-size: 14px; font-weight: 600;
+  }
+
+  /* Mise en page */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .cols { display: grid; gap: 0 20px; }
+  @media (min-width: 960px) {
+    .cols { grid-template-columns: minmax(0, 1fr) 400px; }
+    .result-col { position: sticky; top: 16px; align-self: start; }
+    body { padding-bottom: 24px; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 18px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 2px rgba(60, 40, 20, .04);
+  }
+  h2 { font-size: 17px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  .num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--bord); color: #fff;
+    display: grid; place-items: center; font-size: 14px; font-weight: 700; flex: none;
+  }
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .lbl { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+  .hint { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+
+  /* Choix en pastilles */
+  .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .chips.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .chips.c2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chip {
+    border: 1.5px solid var(--line); background: #fff; border-radius: 10px;
+    padding: 9px 11px; text-align: left; min-height: 50px;
+    display: flex; flex-direction: column; justify-content: center; gap: 1px;
+    transition: border-color .12s;
+  }
+  .chip:hover { border-color: #cdbfae; }
+  .chip:focus-visible { outline: 2px solid var(--bord); outline-offset: 2px; }
+  .chip[aria-checked="true"] { border-color: var(--bord); background: var(--bord-l); box-shadow: inset 0 0 0 1px var(--bord); }
+  .chip .c1 { font-weight: 600; font-size: 14px; }
+  .chip .c2 { font-size: 12.5px; color: var(--muted); }
+  .chip[aria-checked="true"] .c2 { color: var(--bord); }
+
+  /* Messages */
+  .msg { font-size: 13.5px; padding: 8px 11px; border-radius: 9px; margin: 10px 0 0; }
+  .msg:empty { display: none; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  .msg.warn { background: var(--warn-bg); color: var(--warn); }
+  .msg.info { background: #f3efe9; color: var(--ink); }
+  .msg + .msg { margin-top: 6px; }
+
+  /* Quantité */
+  .stepper { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+  .stepper button { width: 46px; height: 46px; border: 0; background: #f4efe8; font-size: 22px; line-height: 1; color: var(--bord); }
+  .stepper button:active { background: #e9e1d6; }
+  .stepper input { width: 84px; border: 0; text-align: center; font-size: 18px; font-weight: 600; -moz-appearance: textfield; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .stepper.sm button { width: 40px; height: 40px; }
+  .stepper.sm input { width: 56px; font-size: 16px; }
+
+  /* Interrupteur */
+  .toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .track { width: 46px; height: 28px; border-radius: 999px; background: #d8cfc3; position: relative; flex: none; transition: background .15s; }
+  .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .15s; }
+  .toggle input:checked + .track { background: var(--bord); }
+  .toggle input:checked + .track::after { transform: translateX(18px); }
+  .toggle input:focus-visible + .track { outline: 2px solid var(--bord); outline-offset: 2px; }
+  .toggle .lbl { margin: 0; }
+  .muted { color: var(--muted); font-weight: 400; }
+
+  /* Champs texte */
+  .txt {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px;
+    background: #fff; font-size: 16px;
+  }
+  .txt:focus, .stepper input:focus { outline: 2px solid var(--bord); outline-offset: -1px; }
+
+  /* Vins */
+  .vin { border: 1px dashed #d7cbbb; border-radius: 12px; padding: 10px; margin-bottom: 10px; background: #fffdf9; }
+  .vin-row { display: grid; grid-template-columns: minmax(0, 1fr) 104px 40px; gap: 8px; align-items: end; margin-top: 8px; }
+  .vin-row label { font-size: 12.5px; color: var(--muted); display: block; }
+  .vin-row .txt { margin-top: 3px; }
+  .vin-del { width: 40px; height: 44px; border: 1.5px solid var(--line); background: #fff; border-radius: 10px; color: var(--muted); font-size: 20px; }
+  .vin-del:disabled { opacity: .35; cursor: default; }
+  .btn-link { background: none; border: 0; color: var(--bord); font-weight: 600; padding: 6px 0; font-size: 15px; }
+
+  /* Résultat */
+  .lines { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 0; margin: 0; font-size: 14.5px; }
+  .lines dt { color: var(--ink); }
+  .lines dd { margin: 0; padding-left: 12px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lines .sub { color: var(--muted); font-size: 12.5px; display: block; font-weight: 400; }
+  .lines .sep { border-top: 1px solid var(--line); padding-top: 7px; font-weight: 700; }
+  .todo { color: var(--warn); font-style: italic; }
+  .big { background: var(--bord); color: #fff; border-radius: 14px; padding: 14px 16px; margin: 14px 0 12px; }
+  .big .k { font-size: 12.5px; text-transform: uppercase; letter-spacing: .6px; opacity: .9; }
+  .big .v { font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .big .s { font-size: 14px; opacity: .9; }
+  .order { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: 14.5px; padding: 10px 2px 2px; }
+  .order .v { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .order .v2 { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .share { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+  .actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+  .actions.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .btn { padding: 12px 8px; border-radius: 10px; border: 1.5px solid var(--bord); background: #fff; color: var(--bord); font-weight: 700; font-size: 15px; }
+  .btn:active { transform: translateY(1px); }
+  .btn.wa { background: var(--wa); border-color: var(--wa); color: #fff; }
+  .reset { text-align: center; margin-top: 8px; }
+
+  .notes ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: #4c433c; }
+  .notes li { margin-bottom: 5px; }
+
+  /* Barre du bas (mobile) */
+  .sticky {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: #fff; border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 16px rgba(60, 40, 20, .08);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .sticky .k { font-size: 12px; color: var(--muted); }
+  .sticky .v { font-size: 22px; font-weight: 800; color: var(--bord); font-variant-numeric: tabular-nums; }
+  .sticky .s { font-size: 12.5px; color: var(--muted); }
+  .sticky button { background: var(--bord); color: #fff; border: 0; border-radius: 10px; padding: 12px 16px; font-weight: 700; white-space: nowrap; }
+  .sticky.off { transform: translateY(110%); }
+  .sticky { transition: transform .2s; }
+  @media (min-width: 960px) { .sticky { display: none; } }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 999px; font-size: 14px;
+    opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 20;
+  }
+  .toast.show { opacity: 1; }
+
+  footer { text-align: center; font-size: 12.5px; color: var(--muted); padding: 4px 16px 20px; max-width: 1100px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <div class="mono" aria-hidden="true">BG</div>
+      <div>
+        <div class="t1">Coffrets bois <span id="annee">2026</span></div>
+        <div class="t2">Les Vins Brunin-Guillier · usage interne</div>
+      </div>
+    </div>
+    <button type="button" class="btn-install" id="btnInstall" hidden>Installer</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="cols">
+    <div class="form-col">
+
+      <section class="card" aria-labelledby="h1">
+        <h2 id="h1"><span class="num">1</span> Le coffret</h2>
+
+        <div class="field">
+          <span class="lbl" id="lblCaisse">Type de caisse</span>
+          <div class="chips" id="caisses" role="radiogroup" aria-labelledby="lblCaisse"></div>
+        </div>
+
+        <div class="field">
+          <span class="lbl" id="lblCouv">Couvercle coulissant</span>
+          <div class="chips c3" id="couvercles" role="radiogroup" aria-labelledby="lblCouv"></div>
+          <p class="hint">Peuplier = bois clair et lisse · Sapin = bois veiné · Plexiglass = transparent</p>
+        </div>
+
+        <div class="field">
+          <span class="lbl" id="lblFormat">Format des bouteilles</span>
+          <div class="chips c2" id="formats" role="radiogroup" aria-labelledby="lblFormat"></div>
+          <p class="hint" id="dimHint"></p>
+        </div>
+
+        <div class="field">
+          <label class="toggle">
+            <input type="checkbox" id="poignee">
+            <span class="track" aria-hidden="true"></span>
+            <span class="lbl">Poignée en corde <span class="muted" id="poigneePrix"></span></span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="lbl" for="qty">Nombre de coffrets</label>
+          <div class="stepper">
+            <button type="button" data-target="qty" data-step="-1" aria-label="Un coffret de moins">−</button>
+            <input id="qty" type="number" inputmode="numeric" min="1" step="1">
+            <button type="button" data-target="qty" data-step="1" aria-label="Un coffret de plus">+</button>
+          </div>
+          <p class="msg" id="qtyMsg"></p>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h2">
+        <h2 id="h2"><span class="num">2</span> Logo du client</h2>
+
+        <div class="field">
+          <span class="lbl" id="lblMarq">Marquage</span>
+          <div class="chips c3" id="marquages" role="radiogroup" aria-labelledby="lblMarq"></div>
+        </div>
+
+        <div id="logoOptions">
+          <div class="field">
+            <span class="lbl" id="lblTaille">Taille du logo</span>
+            <div class="chips c3" id="tailles" role="radiogroup" aria-labelledby="lblTaille"></div>
+            <p class="hint">200 cm² ≈ un carré de 14 × 14 cm</p>
+          </div>
+
+          <div class="field" id="couleursField">
+            <label class="lbl" for="couleurs">Nombre de couleurs</label>
+            <div class="stepper sm">
+              <button type="button" data-target="couleurs" data-step="-1" aria-label="Une couleur de moins">−</button>
+              <input id="couleurs" type="number" inputmode="numeric" min="1" max="6" step="1">
+              <button type="button" data-target="couleurs" data-step="1" aria-label="Une couleur de plus">+</button>
+            </div>
+          </div>
+        </div>
+        <div id="logoMsgs"></div>
+      </section>
+
+      <section class="card" aria-labelledby="h3">
+        <h2 id="h3"><span class="num">3</span> Les vins</h2>
+        <div id="vins"></div>
+        <button type="button" class="btn-link" id="addVin">+ Ajouter un autre vin</button>
+        <p class="msg" id="vinMsg"></p>
+      </section>
+
+    </div>
+
+    <aside class="result-col">
+      <section class="card" id="result" aria-labelledby="h4">
+        <h2 id="h4"><span class="num">4</span> Prix de vente</h2>
+        <dl class="lines" id="lines"></dl>
+
+        <div class="big">
+          <div class="k">Coffret garni · HTVA</div>
+          <div class="v" id="garni">—</div>
+          <div class="s" id="garniTvac"></div>
+        </div>
+
+        <div class="order" id="order"></div>
+
+        <div class="share">
+          <label class="lbl" for="client">Client (pour le récap)</label>
+          <input class="txt" id="client" type="text" autocomplete="off" placeholder="Nom du client ou de la société">
+          <div class="actions" id="actions">
+            <button type="button" class="btn wa" id="btnWa">WhatsApp</button>
+            <button type="button" class="btn" id="btnMail">E-mail</button>
+            <button type="button" class="btn" id="btnCopy">Copier</button>
+            <button type="button" class="btn" id="btnShare" hidden>Partager…</button>
+          </div>
+          <div class="reset"><button type="button" class="btn-link" id="btnReset">Nouveau devis</button></div>
+        </div>
+      </section>
+
+      <section class="card notes" aria-labelledby="h5">
+        <h2 id="h5" style="font-size:15px;margin-bottom:10px">Bon à savoir</h2>
+        <ul>
+          <li>Prix HTVA, marge maison incluse. <strong>Prix planchers</strong> : pas de remise sur la caisse ni sur le logo sans l'accord de Julien.</li>
+          <li>Délais de fabrication indicatifs : ne jamais promettre une date ferme sans l'accord de Julien, surtout avant les fêtes.</li>
+          <li>Logo du client à faire valider avant de confirmer la commande.</li>
+          <li>Champagne, crémant, magnum, bouteille lourde ou de forme spéciale : ne rentre pas forcément, demander à Julien.</li>
+          <li>TVA 21 % sur la caisse comme sur le vin.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<div class="sticky" id="sticky">
+  <div>
+    <div class="k">Coffret garni HTVA</div>
+    <div class="v" id="stickyGarni">—</div>
+    <div class="s" id="stickyTotal"></div>
+  </div>
+  <button type="button" id="btnSee">Voir et envoyer</button>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer>
+  Tarif <span id="annee2">2026</span> · prix de vente HTVA · usage interne, ne pas diffuser.<br>
+  Sur iPhone : Partager → « Sur l'écran d'accueil » pour installer l'appli.
+</footer>
+
+<noscript><p style="text-align:center;padding:16px">Active JavaScript pour utiliser le calculateur.</p></noscript>
+
+<script src="tarif.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var T = window.TARIF;
+  if (!T) { document.body.insertAdjacentHTML('afterbegin', '<p style="padding:16px;color:#8a4b00">Fichier tarif.js introuvable.</p>'); return; }
+
+  // ---------- Outils ----------
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = new Intl.NumberFormat('fr-BE', { style: 'currency', currency: 'EUR' });
+  function eur(n) { return fmt.format(n); }
+  function eurTxt(n) { return eur(n).replace(/[  ]/g, ' '); } // espaces normales pour WhatsApp / mail
+  function num(v) {
+    if (v === null || v === undefined) return NaN;
+    var s = String(v).trim().replace(/\s/g, '').replace(',', '.');
+    return s === '' ? NaN : Number(s);
+  }
+  function ceilCent(x) { return Math.ceil(x * 100 - 1e-7) / 100; }
+  function caisseOf(id) { for (var i = 0; i < T.caisses.length; i++) if (T.caisses[i].id === id) return T.caisses[i]; return T.caisses[0]; }
+  function couvercleOf(id) { for (var i = 0; i < T.couvercles.length; i++) if (T.couvercles[i].id === id) return T.couvercles[i]; return T.couvercles[0]; }
+  function lower(s) { return s.charAt(0).toLowerCase() + s.slice(1); }
+
+  // ---------- État ----------
+  function defaults() {
+    return {
+      caisse: '3', couvercle: 'peuplier', format: 'bordeaux', poignee: false, qty: 10,
+      marquage: 'aucun', taille: 0, couleurs: 1,
+      vins: [{ nom: '', prix: '', nb: 3, auto: true }],
+      client: ''
+    };
+  }
+  var S = defaults();
+
+  // ---------- Pastilles ----------
+  var refreshers = [];
+  function makeChips(el, items, get, set, sub) {
+    el.innerHTML = '';
+    var btns = items.map(function (it) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.setAttribute('role', 'radio');
+      var c1 = document.createElement('span'); c1.className = 'c1'; c1.textContent = it.t;
+      var c2 = document.createElement('span'); c2.className = 'c2';
+      b.appendChild(c1); b.appendChild(c2);
+      b.addEventListener('click', function () { set(it.v); update(); });
+      el.appendChild(b);
+      return { b: b, it: it, c2: c2 };
+    });
+    refreshers.push(function () {
+      btns.forEach(function (x) {
+        var on = get() === x.it.v;
+        x.b.setAttribute('aria-checked', String(on));
+        x.b.tabIndex = on ? 0 : -1;
+        var s = sub ? sub(x.it) : (x.it.s || '');
+        x.c2.textContent = s;
+        x.c2.hidden = !s;
+      });
+    });
+    // Flèches du clavier dans un groupe
+    el.addEventListener('keydown', function (e) {
+      var keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      if (!(e.key in keys)) return;
+      e.preventDefault();
+      var idx = items.findIndex(function (it) { return it.v === get(); });
+      var n = (idx + keys[e.key] + items.length) % items.length;
+      set(items[n].v); update(); btns[n].b.focus();
+    });
+  }
+
+  // ---------- Calcul ----------
+  function laserPalier(q) {
+    for (var i = 0; i < T.laser.length; i++) {
+      var p = T.laser[i];
+      if (q >= p.de && (p.a === null || q <= p.a)) return p;
+    }
+    return null;
+  }
+  function seriPalier(q) {
+    for (var i = 0; i < T.serigraphie.length; i++) if (q <= T.serigraphie[i].jusqua) return T.serigraphie[i];
+    return null;
+  }
+  function seriMax() { return T.serigraphie[T.serigraphie.length - 1].jusqua; }
+
+  // Prix du logo par caisse pour une technique / taille / quantité donnée
+  function logoPrix(tech, taille, q, couleurs) {
+    if (tech === 'aucun') return { ok: true, prix: 0 };
+    if (!(q >= 1)) return { ok: false, raison: 'Indique le nombre de coffrets.' };
+    if (tech === 'laser') {
+      var p = laserPalier(q);
+      return { ok: true, prix: p.prix[taille], palier: p };
+    }
+    var ps = seriPalier(q);
+    if (!ps) return { ok: false, raison: 'Plus de ' + seriMax().toLocaleString('fr-BE') + ' caisses : prix sur demande à Julien.' };
+    var forfait = Math.round(ps.forfait[Math.min(taille, 1)] * Math.max(1, couleurs) * 100) / 100;
+    return { ok: true, prix: ceilCent(forfait / q), forfait: forfait, palier: ps };
+  }
+
+  function calc() {
+    var c = caisseOf(S.caisse);
+    var q = S.qty;
+    var r = {
+      caisse: c,
+      prixCaisse: c.prix[S.couvercle],
+      poignee: S.poignee ? T.poignee : 0,
+      logo: logoPrix(S.marquage, S.taille, q, S.couleurs),
+      vin: 0, nbBouteilles: 0, vinManquant: false
+    };
+    S.vins.forEach(function (v) {
+      var p = num(v.prix), n = num(v.nb);
+      if (!(n > 0)) return;
+      r.nbBouteilles += n;
+      if (isNaN(p)) { r.vinManquant = true; return; }
+      r.vin += p * n;
+    });
+    if (r.nbBouteilles === 0) r.vinManquant = true;
+    r.vin = Math.round(r.vin * 100) / 100;
+    r.emballage = r.logo.ok ? Math.round((r.prixCaisse + r.poignee + r.logo.prix) * 100) / 100 : null;
+    r.garni = r.emballage === null ? null : Math.round((r.emballage + r.vin) * 100) / 100;
+    r.tvac = r.garni === null ? null : r.garni * (1 + T.tva);
+    r.total = (r.garni !== null && q >= 1) ? r.garni * q : null;
+    r.totalTvac = r.total === null ? null : r.total * (1 + T.tva);
+    return r;
+  }
+
+  // ---------- Affichage ----------
+  function msg(el, kind, text) { el.className = 'msg ' + (text ? kind : ''); el.textContent = text || ''; }
+  function addMsg(box, kind, text) { var p = document.createElement('p'); p.className = 'msg ' + kind; p.textContent = text; box.appendChild(p); }
+
+  function update() {
+    var c = caisseOf(S.caisse);
+    var r = calc();
+
+    refreshers.forEach(function (f) { f(); });
+
+    // Dimensions
+    $('dimHint').textContent = 'Dimensions intérieures : ' + c.dim[S.format] + ' cm (H × L × P). Même prix en Bordeaux et en Bourgogne.';
+    $('poigneePrix').textContent = '+ ' + eur(T.poignee) + ' par coffret';
+    $('poignee').checked = S.poignee;
+
+    // Quantité
+    if (String(num($('qty').value)) !== String(S.qty)) $('qty').value = isNaN(S.qty) ? '' : S.qty;
+    var q = S.qty;
+    if (!(q >= 1)) msg($('qtyMsg'), 'warn', 'Indique le nombre de coffrets.');
+    else if (q < T.quantite.min) msg($('qtyMsg'), 'warn', 'Moins de ' + T.quantite.min + ' caisses : vérifier le stock avec Julien.');
+    else if (q > T.quantite.max) msg($('qtyMsg'), 'warn', 'Plus de ' + T.quantite.max + ' caisses : demander le prix à Julien.');
+    else msg($('qtyMsg'), 'ok', 'Prix valables de ' + T.quantite.min + ' à ' + T.quantite.max + ' caisses identiques.');
+
+    // Logo
+    $('logoOptions').hidden = S.marquage === 'aucun';
+    $('couleursField').hidden = S.marquage !== 'serigraphie';
+    $('couleurs').value = S.couleurs;
+    var box = $('logoMsgs'); box.innerHTML = '';
+    if (S.marquage !== 'aucun') {
+      if (!r.logo.ok) addMsg(box, 'warn', r.logo.raison);
+      else if (S.marquage === 'laser') {
+        var pl = r.logo.palier;
+        addMsg(box, 'info', 'Laser : ' + eur(r.logo.prix) + ' par caisse (palier ' + pl.de + (pl.a ? ' à ' + pl.a : ' et plus') + ' caisses).');
+      } else {
+        addMsg(box, 'info', 'Forfait série ' + eur(r.logo.forfait) + ' ÷ ' + q + ' coffrets = ' + eur(r.logo.prix) + ' par caisse.');
+        var las = logoPrix('laser', S.taille, q, 1);
+        if (las.ok && las.prix < r.logo.prix) addMsg(box, 'info', 'Astuce : en laser (noir), ce serait ' + eur(las.prix) + ' par caisse.');
+      }
+      if (S.marquage === 'laser' && S.couvercle === 'plexiglass') addMsg(box, 'warn', 'Le laser est prévu sur bois : sur un couvercle plexiglass, demander à Julien.');
+      if (S.marquage === 'serigraphie' && S.taille === 2) addMsg(box, 'warn', 'En sérigraphie, un grand logo est compté au prix « plus de 200 cm² » : à confirmer avec Julien.');
+    }
+
+    // Vins
+    var cap = c.bouteilles, nb = r.nbBouteilles;
+    if (nb === 0) msg($('vinMsg'), 'info', 'Indique le prix et le nombre de bouteilles.');
+    else if (nb === cap) msg($('vinMsg'), r.vinManquant ? 'warn' : 'ok', r.vinManquant ? 'Il manque un prix de vin.' : 'Coffret complet : ' + nb + ' bouteille' + (nb > 1 ? 's' : '') + '.');
+    else if (nb < cap) msg($('vinMsg'), 'warn', 'Il manque ' + (cap - nb) + ' bouteille' + (cap - nb > 1 ? 's' : '') + ' : la caisse en contient ' + cap + '.');
+    else msg($('vinMsg'), 'warn', 'Trop de bouteilles : la caisse en contient ' + cap + '.');
+    $('addVin').hidden = S.vins.length >= 6;
+    Array.prototype.forEach.call(document.querySelectorAll('.vin-del'), function (b) { b.disabled = S.vins.length === 1; });
+
+    // Lignes du résultat
+    var L = $('lines'); L.innerHTML = '';
+    function line(label, sub, value, cls) {
+      var dt = document.createElement('dt'); dt.textContent = label;
+      if (sub) { var s = document.createElement('span'); s.className = 'sub'; s.textContent = sub; dt.appendChild(s); }
+      var dd = document.createElement('dd');
+      if (value === null) { dd.textContent = 'sur demande'; dd.className = 'todo'; }
+      else if (typeof value === 'string') { dd.textContent = value; dd.className = 'todo'; }
+      else dd.textContent = eur(value);
+      if (cls) { dt.classList.add(cls); dd.classList.add(cls); }
+      L.appendChild(dt); L.appendChild(dd);
+    }
+    line('Caisse ' + c.nom, 'couvercle ' + lower(couvercleOf(S.couvercle).nom), r.prixCaisse);
+    if (S.poignee) line('Poignée en corde', null, r.poignee);
+    if (S.marquage !== 'aucun') line('Logo ' + (S.marquage === 'laser' ? 'laser' : 'sérigraphie'), lower(T.tailles[S.taille]), r.logo.ok ? r.logo.prix : (q >= 1 ? null : 'à compléter'));
+    line('Emballage bois', 'par coffret', r.emballage, 'sep');
+    line('Vin', nb ? nb + ' bouteille' + (nb > 1 ? 's' : '') : null, (r.vinManquant && r.vin === 0) ? 'à compléter' : r.vin);
+
+    $('garni').textContent = r.garni === null ? 'Sur demande' : eur(r.garni);
+    $('garniTvac').textContent = r.tvac === null ? '' : eur(r.tvac) + ' TVAC (21 %)' + (r.vinManquant ? ' · vin à compléter' : '');
+
+    var O = $('order'); O.innerHTML = '';
+    if (r.total !== null) {
+      O.innerHTML =
+        '<div>Total · ' + q + ' coffret' + (q > 1 ? 's' : '') + '</div><div class="v">' + eur(r.total) + ' HTVA</div>' +
+        '<div></div><div class="v2">' + eur(r.totalTvac) + ' TVAC</div>';
+    }
+
+    $('stickyGarni').textContent = r.garni === null ? 'Sur demande' : eur(r.garni);
+    $('stickyTotal').textContent = r.total === null ? '' : 'Total ' + q + ' coffret' + (q > 1 ? 's' : '') + ' : ' + eur(r.total);
+  }
+
+  // ---------- Vins ----------
+  function renderVins() {
+    var box = $('vins'); box.innerHTML = '';
+    S.vins.forEach(function (v, i) {
+      var d = document.createElement('div'); d.className = 'vin';
+      d.innerHTML =
+        '<input class="txt vin-nom" type="text" autocomplete="off" placeholder="Vin ' + (i + 1) + ' (facultatif : nom, millésime)">' +
+        '<div class="vin-row">' +
+          '<label>Prix HTVA / bouteille<input class="txt vin-prix" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off"></label>' +
+          '<label>Bouteilles<input class="txt vin-nb" type="number" inputmode="numeric" min="0" step="1"></label>' +
+          '<button type="button" class="vin-del" aria-label="Retirer ce vin">×</button>' +
+        '</div>';
+      var nom = d.querySelector('.vin-nom'), prix = d.querySelector('.vin-prix'), nbI = d.querySelector('.vin-nb');
+      nom.value = v.nom; prix.value = v.prix; nbI.value = v.nb;
+      nom.addEventListener('input', function () { v.nom = nom.value; });
+      prix.addEventListener('input', function () { v.prix = prix.value; update(); });
+      nbI.addEventListener('input', function () { v.nb = nbI.value; v.auto = false; update(); });
+      d.querySelector('.vin-del').addEventListener('click', function () {
+        if (S.vins.length > 1) { S.vins.splice(i, 1); renderVins(); update(); }
+      });
+      box.appendChild(d);
+    });
+  }
+
+  function syncAutoBouteilles() {
+    // Un seul vin non modifié à la main : on le cale sur la capacité de la caisse
+    if (S.vins.length === 1 && S.vins[0].auto) {
+      S.vins[0].nb = caisseOf(S.caisse).bouteilles;
+      var el = document.querySelector('.vin-nb');
+      if (el) el.value = S.vins[0].nb;
+    }
+  }
+
+  // ---------- Récapitulatif ----------
+  function recap(bold) {
+    var r = calc(), c = r.caisse, q = S.qty;
+    var b = function (s) { return bold ? '*' + s + '*' : s; };
+    var out = [];
+    out.push(b('Devis coffret bois — Les Vins Brunin-Guillier'));
+    if (S.client.trim()) out.push('Client : ' + S.client.trim());
+    out.push('');
+    out.push('Coffret : caisse ' + c.nom + ', couvercle ' + lower(couvercleOf(S.couvercle).nom) + ', format ' + (S.format === 'bordeaux' ? 'Bordeaux' : 'Bourgogne') + (S.poignee ? ', poignée en corde' : ''));
+    if (S.marquage === 'laser') out.push('Logo : gravure laser, ' + lower(T.tailles[S.taille]));
+    if (S.marquage === 'serigraphie') out.push('Logo : sérigraphie ' + S.couleurs + ' couleur' + (S.couleurs > 1 ? 's' : '') + ', ' + lower(T.tailles[S.taille]));
+    var vinLines = [];
+    S.vins.forEach(function (v) {
+      var n = num(v.nb), p = num(v.prix);
+      if (!(n > 0)) return;
+      var nom = v.nom.trim();
+      var lib = nom ? n + ' × ' + nom : n + ' bouteille' + (n > 1 ? 's' : '');
+      vinLines.push('- ' + lib + (isNaN(p) ? '' : ' à ' + eurTxt(p) + ' HTVA'));
+    });
+    if (vinLines.length) { out.push('Vins :'); out = out.concat(vinLines); }
+    out.push('');
+    if (r.garni === null) {
+      out.push(b('Prix par coffret : sur demande'));
+    } else {
+      out.push(b('Prix par coffret : ' + eurTxt(r.garni) + ' HTVA') + ' (' + eurTxt(r.tvac) + ' TVAC)');
+      out.push('dont caisse' + (S.marquage !== 'aucun' ? ' et logo' : '') + ' : ' + eurTxt(r.emballage) + ' HTVA');
+      if (r.total !== null) {
+        out.push('Quantité : ' + q + ' coffret' + (q > 1 ? 's' : ''));
+        out.push(b('Total : ' + eurTxt(r.total) + ' HTVA') + ' (' + eurTxt(r.totalTvac) + ' TVAC)');
+      }
+    }
+    out.push('');
+    out.push('Prix ' + T.annee + ', sous réserve de disponibilité' + (S.marquage !== 'aucun' ? ' et de validation du logo' : '') + '.');
+    return out.join('\n');
+  }
+
+  var toastTimer;
+  function toast(t) {
+    var el = $('toast'); el.textContent = t; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
+  }
+  function copy(text) {
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta); toast(ok ? 'Récap copié' : 'Copie impossible sur cet appareil');
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { toast('Récap copié'); }, fallback);
+    else fallback();
+  }
+
+  // ---------- Construction ----------
+  makeChips($('caisses'), T.caisses.map(function (c) { return { v: c.id, t: c.nom }; }),
+    function () { return S.caisse; }, function (v) { S.caisse = v; syncAutoBouteilles(); },
+    function (it) { return eur(caisseOf(it.v).prix[S.couvercle]); });
+
+  makeChips($('couvercles'), T.couvercles.map(function (c) { return { v: c.id, t: c.nom }; }),
+    function () { return S.couvercle; }, function (v) { S.couvercle = v; },
+    function (it) { return eur(caisseOf(S.caisse).prix[it.v]); });
+
+  makeChips($('formats'), [{ v: 'bordeaux', t: 'Bordeaux' }, { v: 'bourgogne', t: 'Bourgogne' }],
+    function () { return S.format; }, function (v) { S.format = v; });
+
+  makeChips($('marquages'), [{ v: 'aucun', t: 'Aucun' }, { v: 'laser', t: 'Laser', s: 'noir, gravé' }, { v: 'serigraphie', t: 'Sérigraphie', s: 'couleur, imprimée' }],
+    function () { return S.marquage; }, function (v) { S.marquage = v; });
+
+  makeChips($('tailles'), T.tailles.map(function (t, i) { return { v: i, t: t }; }),
+    function () { return S.taille; }, function (v) { S.taille = v; },
+    function (it) {
+      if (S.marquage === 'aucun') return '';
+      var p = logoPrix(S.marquage, it.v, S.qty, S.couleurs);
+      if (!p.ok) return '';
+      return S.marquage === 'laser' ? eur(p.prix) + ' / caisse' : 'forfait ' + eur(p.forfait);
+    });
+
+  $('poignee').addEventListener('change', function (e) { S.poignee = e.target.checked; update(); });
+  $('qty').addEventListener('input', function (e) { var n = num(e.target.value); S.qty = n >= 0 ? Math.floor(n) : NaN; update(); });
+  $('couleurs').addEventListener('input', function (e) { var n = num(e.target.value); S.couleurs = Math.min(6, Math.max(1, Math.floor(n) || 1)); update(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-step]'), function (b) {
+    b.addEventListener('click', function () {
+      var step = Number(b.getAttribute('data-step'));
+      if (b.getAttribute('data-target') === 'qty') {
+        var cur = S.qty >= 1 ? S.qty : 0;
+        S.qty = Math.max(1, cur + step);
+      } else {
+        S.couleurs = Math.min(6, Math.max(1, S.couleurs + step));
+      }
+      update();
+    });
+  });
+
+  $('addVin').addEventListener('click', function () {
+    var r = calc(), reste = Math.max(0, r.caisse.bouteilles - r.nbBouteilles);
+    S.vins.forEach(function (v) { v.auto = false; });
+    S.vins.push({ nom: '', prix: '', nb: reste || 1, auto: false });
+    renderVins(); update();
+    var inputs = document.querySelectorAll('.vin-nom'); inputs[inputs.length - 1].focus();
+  });
+
+  $('client').addEventListener('input', function (e) { S.client = e.target.value; });
+
+  $('btnWa').addEventListener('click', function () {
+    window.open('https://wa.me/?text=' + encodeURIComponent(recap(true)), '_blank', 'noopener');
+  });
+  $('btnMail').addEventListener('click', function () {
+    var subj = 'Devis coffret bois' + (S.client.trim() ? ' — ' + S.client.trim() : '');
+    window.location.href = 'mailto:?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(recap(false));
+  });
+  $('btnCopy').addEventListener('click', function () { copy(recap(false)); });
+  if (navigator.share) {
+    $('btnShare').hidden = false;
+    $('actions').classList.add('four');
+    $('btnShare').addEventListener('click', function () {
+      navigator.share({ title: 'Devis coffret bois', text: recap(false) }).catch(function () {});
+    });
+  }
+  $('btnReset').addEventListener('click', function () {
+    S = defaults(); $('client').value = ''; renderVins(); update(); window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  $('btnSee').addEventListener('click', function () { $('result').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  // Installation (Android / ordinateur)
+  var deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; $('btnInstall').hidden = false; });
+  $('btnInstall').addEventListener('click', function () {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(function () { deferredPrompt = null; $('btnInstall').hidden = true; });
+  });
+  window.addEventListener('appinstalled', function () { $('btnInstall').hidden = true; });
+
+  // Hors ligne (seulement une fois en ligne, en https)
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+
+  $('annee').textContent = T.annee;
+  $('annee2').textContent = T.annee;
+  renderVins();
+  update();
+
+  // Barre du bas masquée quand le bloc prix est à l'écran
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      $('sticky').classList.toggle('off', entries[0].isIntersecting);
+    }, { threshold: 0.15 }).observe($('result'));
+  }
+})();
+</script>
+</body>
+</html>
